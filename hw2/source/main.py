@@ -162,6 +162,16 @@ candidates = generate_candidates_weight(k_1=1.6, b=0.75)
 queries = generate_queries_weight(ka=5.0)
 ret = (np.transpose(candidates.dot(np.transpose(queries)))).argsort(axis=1)[:, ::-1][:, :100]
 
+if args.best_switch:
+    pass
+elif args.rel_switch:
+    new_queries = np.zeros((query_num, word_num))
+    for idx, (r, q) in enumerate(zip(ret, queries)):
+        new_queries[idx, :] = q + 0.75 * np.mean(candidates[r[:10]], axis=0)
+    ret = (np.transpose(candidates.dot(np.transpose(new_queries)))).argsort(axis=1)[:, ::-1][:, :100]
+else:
+    pass
+
 with open(OUTPUT_FILE, 'w+') as f:
     csvwriter = csv.writer(f, delimiter=',')
     csvwriter.writerow(['query_id', 'retrieved_docs'])
